@@ -1,0 +1,18 @@
+model:
+  path: "models/best.pt"
+  confidence: 0.5
+  iou: 0.6
+  
+tracking:
+  history_len: 15
+  min_hits: 3
+  max_lost: 30
+  voting_threshold: 0.6
+  
+video:
+  input: "data/input.mp4"
+  output: "data/output.mp4"
+  
+classes:
+  head: 0
+  helmet: 1
