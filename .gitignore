@@ -1,0 +1,17 @@
+# изображения датасетов — не в git (тяжёлые, лежат локально)
+hard_hat_dataset/images/
+hard_hat_dataset_v6/images/
+# окружения и кэш
+.venv/
+.venv-train/
+.uvcache/
+__pycache__/
+*.pyc
+# артефакты обучения/инференса
+runs/
+mlruns/
+mlflow.db
+mlflow_artifacts/
+*.mp4
+debug/
+*.cache

@@ -1,0 +1,7 @@
+path: .
+train: images/train
+val: images/val
+nc: 2
+names:
+- head_with_helmet
+- helmet

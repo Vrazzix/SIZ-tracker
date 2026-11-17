@@ -1,0 +1,9 @@
+# датасет v2 (hard_hat_dataset): 0=head (голова без каски), 1=helmet
+# images/ лежат локально (см. .gitignore)
+path: .
+train: images/train
+val: images/val
+nc: 2
+names:
+- head
+- helmet

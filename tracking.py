@@ -2,11 +2,11 @@ import cv2
 from collections import defaultdict, deque
 from ultralytics import YOLO
 
-# ID классов в вашей модели
-HEAD_ID, HELMET_ID = 0, 1
+# ID классов в вашей модели (dataset.yaml: 0=head_with_helmet, 1=helmet)
+HEAD_WITH_HELMET_ID, HELMET_ID = 0, 1
 
 class HelmetTracker:
-    def __init__(self, model_path, conf=0.5, iou=0.5,
+    def __init__(self, model_path, conf=0.2, iou=0.5,
                  history_len=15, min_hits=3, max_lost=30):
         """
         Трекает каски и головы без привязки друг к другу.
@@ -31,7 +31,7 @@ class HelmetTracker:
             frame,
             conf=self.conf,
             iou=self.iou,
-            classes=[HEAD_ID, HELMET_ID],
+            classes=[HEAD_WITH_HELMET_ID, HELMET_ID],
             persist=True,
             tracker='bytetrack.yaml',
             verbose=False,
@@ -63,8 +63,8 @@ class HelmetTracker:
                 
             self.last_seen[obj_id] = self.frame_id
             
-            # Определяем статус (1 - есть каска, 0 - нет каски)
-            status_val = 1 if c == HELMET_ID else 0
+            # Определяем статус (1 - человек в каске, 0 - каска без человека)
+            status_val = 1 if c == HEAD_WITH_HELMET_ID else 0
             self.history[obj_id].append(status_val)
             
             h_hist = self.history[obj_id]
@@ -98,10 +98,10 @@ def draw(frame, detections):
             # Еще не набрали статистику (первые кадры появления)
             color, label = (200, 200, 200), f'ID {obj_id}: ...'
         elif status:
-            # Модель нашла каску
-            color, label = (0, 200, 0),   f'ID {obj_id}: HELMET'
+            # Человек в каске (head_with_helmet)
+            color, label = (0, 200, 0),   f'ID {obj_id}: PROTECTED'
         else:
-            # Модель нашла голову (без каски)
+            # Отдельная каска (helmet) / без человека
             color, label = (0, 0, 255),   f'ID {obj_id}: NO HELMET'
             
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
@@ -110,8 +110,8 @@ def draw(frame, detections):
 
 
 # ---------- НАСТРОЙКИ ----------
-MODEL_PATH = '/home/user/Shcheglov/Shcheglov/Helmets_and_masks/runs/detect/hard_hat_yolov26n_no_person/weights/best.pt'
-VIDEO_IN   = '/home/user/Shcheglov/Shcheglov/Helmets_and_masks/Importance-of-wearing-Safety-helmets-at-work-_IsNo6F3gNHw_.mp4'
+MODEL_PATH = '/home/user/Shcheglov/Shcheglov/Helmets_and_masks/runs/detect/hwh-class/weights/best.pt'
+VIDEO_IN   = '/home/user/Shcheglov/Shcheglov/Helmets_and_masks/Запись с веб-камеры строительство дома из профилированного бруса [get-save.com].mp4'
 VIDEO_OUT  = 'results_helmets_out.mp4'
 
 # Инициализация (conf=0.5 чтобы отсечь ложные каски на фоне)
