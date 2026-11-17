@@ -17,6 +17,8 @@
 | `weights/v3_head_helmet_best.pt` | Обученная v3-модель (head+helmet, 100 эпох) |
 | `yolo26n.pt` | Базовая модель для дообучения |
 | `yolov8n-face-lindevs.pt` | Face-модель (для диагностики домен-разрыва) |
+| `tools/make_real_head_labels.py` | B1: авто-разметка реальных голов (верх person-бокса COCO) + каски (v3) из видео |
+| `tools/render_real_heads.py` | Превью-сетка авто-разметки реальных голов |
 | `load_and_preprocess.ipynb` | Препроцессинг исходных XML-разметок |
 
 ## Как запустить
@@ -29,6 +31,15 @@ python tools/train.py --tag v3 --data <датасет>/dataset.yaml   # обуч
 mlflow server --backend-store-uri sqlite:///mlflow.db --port 5000
 ```
 
+### Пайплайн B1 (реальные головы)
+
+```bash
+python tools/make_real_head_labels.py     # кадры из видео -> real_world_frames/ (head из верха person + каски)
+python tools/render_real_heads.py         # превью сетки авто-разметки (проверка до обучения)
+# объединение синтетики (ds_head_helmet) + real_world_frames -> datasets/ds_v3_real/
+python tools/train.py --tag v3-realdom --data datasets/ds_v3_real/dataset.yaml
+```
+
 ## Стратегии сравнения
 
 - **v3** — одна модель с классами `head` + `helmet`, решение и stray-логика в коде.
@@ -36,8 +47,8 @@ mlflow server --backend-store-uri sqlite:///mlflow.db --port 5000
 
 Вывод по v3 на реальном видео: каски детектит, головы — плохо (мелкие вдали,
 низкое качество веб-камеры; предобученная face-модель на тех же кадрах также
-находит 0–1 лиц). Улучшение: добавить в датасет реальные мелкие головы со
-видео стройки.
+находит 0–1 лиц). Решение — пайплайн B1: авто-разметка реальных голов из верха
+person-бокса (COCO) + дообучение (тег v3-realdom), сравнение в MLflow.
 
 ## Демонстрация
 
